@@ -1,23 +1,28 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"judge-engine/cmd/docker"
 	"os"
 )
 
+// Root command
 var rootCmd = &cobra.Command{
-	Use:   "judge",
-	Short: "",
-	Long:  "",
+	Use:   "app",
+	Short: "Online Judge System Engine",
+	Long:  "Engine API of Online Judge System",
 	Run: func(cmd *cobra.Command, args []string) {
 
 	},
 }
 
+// Enroll Sub commands and flags
+func init() {
+	rootCmd.AddCommand(docker.DockerRootCmd)
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
