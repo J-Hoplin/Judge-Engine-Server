@@ -5,6 +5,29 @@
 
 ---
 
+## Basic setup
+
+1. Install golang dependencies
+    
+    ```shell
+   go mod download
+   ```
+   
+2. Compile Application
+   
+    ```shell
+   go build -o app
+   ```
+
+## Command for run application
+
+```shell
+./app run
+```
+**Available Flags**
+
+- `-p`: Specify application port
+
 ## Command for docker config
 
 ### View docker-compose project service list

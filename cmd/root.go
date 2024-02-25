@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"judge-engine/cmd/docker"
+	"judge-engine/cmd/server"
 	"os"
 )
 
@@ -18,7 +19,7 @@ var rootCmd = &cobra.Command{
 
 // Enroll Sub commands and flags
 func init() {
-	rootCmd.AddCommand(docker.DockerRootCmd)
+	rootCmd.AddCommand(docker.DockerRootCmd, server.ServerRootCmd)
 }
 
 func Execute() {
