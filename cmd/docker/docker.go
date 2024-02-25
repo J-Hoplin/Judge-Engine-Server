@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"errors"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -25,7 +26,7 @@ var DockerRootCmd = &cobra.Command{
 	Short: "Docker related commands",
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
+		return errors.New("Subcommand not found")
 	},
 }
 
