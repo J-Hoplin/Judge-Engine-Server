@@ -12,8 +12,14 @@
     ```shell
    go mod download
    ```
+
+2. `Ent` generate
    
-2. Compile Application
+    ```shell
+  go generate ./ent
+   ```
+
+3. Compile Application
    
     ```shell
    go build -o app
