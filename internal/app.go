@@ -19,7 +19,7 @@ func ApplicationBootstrap(port int) error {
 	var server *http.Server
 
 	// Bootstrap of database
-	err = database.DatabaseBootstrap()
+	err = database.MySQLBootstrap()
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Client is the client that holds all ent builders.
@@ -258,7 +259,7 @@ func (c *SubmissionClient) UpdateOne(s *Submission) *SubmissionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SubmissionClient) UpdateOneID(id int) *SubmissionUpdateOne {
+func (c *SubmissionClient) UpdateOneID(id uuid.UUID) *SubmissionUpdateOne {
 	mutation := newSubmissionMutation(c.config, OpUpdateOne, withSubmissionID(id))
 	return &SubmissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -275,7 +276,7 @@ func (c *SubmissionClient) DeleteOne(s *Submission) *SubmissionDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SubmissionClient) DeleteOneID(id int) *SubmissionDeleteOne {
+func (c *SubmissionClient) DeleteOneID(id uuid.UUID) *SubmissionDeleteOne {
 	builder := c.Delete().Where(submission.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -292,12 +293,12 @@ func (c *SubmissionClient) Query() *SubmissionQuery {
 }
 
 // Get returns a Submission entity by its id.
-func (c *SubmissionClient) Get(ctx context.Context, id int) (*Submission, error) {
+func (c *SubmissionClient) Get(ctx context.Context, id uuid.UUID) (*Submission, error) {
 	return c.Query().Where(submission.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SubmissionClient) GetX(ctx context.Context, id int) *Submission {
+func (c *SubmissionClient) GetX(ctx context.Context, id uuid.UUID) *Submission {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

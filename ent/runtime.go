@@ -2,8 +2,38 @@
 
 package ent
 
+import (
+	"judge-engine/ent/schema"
+	"judge-engine/ent/submission"
+	"time"
+
+	"github.com/google/uuid"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	submissionFields := schema.Submission{}.Fields()
+	_ = submissionFields
+	// submissionDescCodeLength is the schema descriptor for codeLength field.
+	submissionDescCodeLength := submissionFields[2].Descriptor()
+	// submission.CodeLengthValidator is a validator for the "codeLength" field. It is called by the builders before save.
+	submission.CodeLengthValidator = submissionDescCodeLength.Validators[0].(func(int) error)
+	// submissionDescMemory is the schema descriptor for memory field.
+	submissionDescMemory := submissionFields[3].Descriptor()
+	// submission.MemoryValidator is a validator for the "memory" field. It is called by the builders before save.
+	submission.MemoryValidator = submissionDescMemory.Validators[0].(func(int) error)
+	// submissionDescCreatedAt is the schema descriptor for createdAt field.
+	submissionDescCreatedAt := submissionFields[5].Descriptor()
+	// submission.DefaultCreatedAt holds the default value on creation for the createdAt field.
+	submission.DefaultCreatedAt = submissionDescCreatedAt.Default.(func() time.Time)
+	// submissionDescUpdatedAt is the schema descriptor for updatedAt field.
+	submissionDescUpdatedAt := submissionFields[6].Descriptor()
+	// submission.DefaultUpdatedAt holds the default value on creation for the updatedAt field.
+	submission.DefaultUpdatedAt = submissionDescUpdatedAt.Default.(func() time.Time)
+	// submissionDescID is the schema descriptor for id field.
+	submissionDescID := submissionFields[0].Descriptor()
+	// submission.DefaultID holds the default value on creation for the id field.
+	submission.DefaultID = submissionDescID.Default.(func() uuid.UUID)
 }

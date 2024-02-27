@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"judge-engine/ent/predicate"
+	"judge-engine/ent/schema/enum"
 	"judge-engine/ent/submission"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +26,104 @@ type SubmissionUpdate struct {
 // Where appends a list predicates to the SubmissionUpdate builder.
 func (su *SubmissionUpdate) Where(ps ...predicate.Submission) *SubmissionUpdate {
 	su.mutation.Where(ps...)
+	return su
+}
+
+// SetCode sets the "code" field.
+func (su *SubmissionUpdate) SetCode(s string) *SubmissionUpdate {
+	su.mutation.SetCode(s)
+	return su
+}
+
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableCode(s *string) *SubmissionUpdate {
+	if s != nil {
+		su.SetCode(*s)
+	}
+	return su
+}
+
+// SetCodeLength sets the "codeLength" field.
+func (su *SubmissionUpdate) SetCodeLength(i int) *SubmissionUpdate {
+	su.mutation.ResetCodeLength()
+	su.mutation.SetCodeLength(i)
+	return su
+}
+
+// SetNillableCodeLength sets the "codeLength" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableCodeLength(i *int) *SubmissionUpdate {
+	if i != nil {
+		su.SetCodeLength(*i)
+	}
+	return su
+}
+
+// AddCodeLength adds i to the "codeLength" field.
+func (su *SubmissionUpdate) AddCodeLength(i int) *SubmissionUpdate {
+	su.mutation.AddCodeLength(i)
+	return su
+}
+
+// SetMemory sets the "memory" field.
+func (su *SubmissionUpdate) SetMemory(i int) *SubmissionUpdate {
+	su.mutation.ResetMemory()
+	su.mutation.SetMemory(i)
+	return su
+}
+
+// SetNillableMemory sets the "memory" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableMemory(i *int) *SubmissionUpdate {
+	if i != nil {
+		su.SetMemory(*i)
+	}
+	return su
+}
+
+// AddMemory adds i to the "memory" field.
+func (su *SubmissionUpdate) AddMemory(i int) *SubmissionUpdate {
+	su.mutation.AddMemory(i)
+	return su
+}
+
+// SetResponse sets the "response" field.
+func (su *SubmissionUpdate) SetResponse(et enum.ResponseType) *SubmissionUpdate {
+	su.mutation.SetResponse(et)
+	return su
+}
+
+// SetNillableResponse sets the "response" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableResponse(et *enum.ResponseType) *SubmissionUpdate {
+	if et != nil {
+		su.SetResponse(*et)
+	}
+	return su
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (su *SubmissionUpdate) SetCreatedAt(t time.Time) *SubmissionUpdate {
+	su.mutation.SetCreatedAt(t)
+	return su
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableCreatedAt(t *time.Time) *SubmissionUpdate {
+	if t != nil {
+		su.SetCreatedAt(*t)
+	}
+	return su
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (su *SubmissionUpdate) SetUpdatedAt(t time.Time) *SubmissionUpdate {
+	su.mutation.SetUpdatedAt(t)
+	return su
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (su *SubmissionUpdate) SetNillableUpdatedAt(t *time.Time) *SubmissionUpdate {
+	if t != nil {
+		su.SetUpdatedAt(*t)
+	}
 	return su
 }
 
@@ -59,14 +159,61 @@ func (su *SubmissionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (su *SubmissionUpdate) check() error {
+	if v, ok := su.mutation.CodeLength(); ok {
+		if err := submission.CodeLengthValidator(v); err != nil {
+			return &ValidationError{Name: "codeLength", err: fmt.Errorf(`ent: validator failed for field "Submission.codeLength": %w`, err)}
+		}
+	}
+	if v, ok := su.mutation.Memory(); ok {
+		if err := submission.MemoryValidator(v); err != nil {
+			return &ValidationError{Name: "memory", err: fmt.Errorf(`ent: validator failed for field "Submission.memory": %w`, err)}
+		}
+	}
+	if v, ok := su.mutation.Response(); ok {
+		if err := submission.ResponseValidator(v); err != nil {
+			return &ValidationError{Name: "response", err: fmt.Errorf(`ent: validator failed for field "Submission.response": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (su *SubmissionUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeInt))
+	if err := su.check(); err != nil {
+		return n, err
+	}
+	_spec := sqlgraph.NewUpdateSpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeUUID))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.Code(); ok {
+		_spec.SetField(submission.FieldCode, field.TypeString, value)
+	}
+	if value, ok := su.mutation.CodeLength(); ok {
+		_spec.SetField(submission.FieldCodeLength, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedCodeLength(); ok {
+		_spec.AddField(submission.FieldCodeLength, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.Memory(); ok {
+		_spec.SetField(submission.FieldMemory, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedMemory(); ok {
+		_spec.AddField(submission.FieldMemory, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.Response(); ok {
+		_spec.SetField(submission.FieldResponse, field.TypeEnum, value)
+	}
+	if value, ok := su.mutation.CreatedAt(); ok {
+		_spec.SetField(submission.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := su.mutation.UpdatedAt(); ok {
+		_spec.SetField(submission.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -86,6 +233,104 @@ type SubmissionUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SubmissionMutation
+}
+
+// SetCode sets the "code" field.
+func (suo *SubmissionUpdateOne) SetCode(s string) *SubmissionUpdateOne {
+	suo.mutation.SetCode(s)
+	return suo
+}
+
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableCode(s *string) *SubmissionUpdateOne {
+	if s != nil {
+		suo.SetCode(*s)
+	}
+	return suo
+}
+
+// SetCodeLength sets the "codeLength" field.
+func (suo *SubmissionUpdateOne) SetCodeLength(i int) *SubmissionUpdateOne {
+	suo.mutation.ResetCodeLength()
+	suo.mutation.SetCodeLength(i)
+	return suo
+}
+
+// SetNillableCodeLength sets the "codeLength" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableCodeLength(i *int) *SubmissionUpdateOne {
+	if i != nil {
+		suo.SetCodeLength(*i)
+	}
+	return suo
+}
+
+// AddCodeLength adds i to the "codeLength" field.
+func (suo *SubmissionUpdateOne) AddCodeLength(i int) *SubmissionUpdateOne {
+	suo.mutation.AddCodeLength(i)
+	return suo
+}
+
+// SetMemory sets the "memory" field.
+func (suo *SubmissionUpdateOne) SetMemory(i int) *SubmissionUpdateOne {
+	suo.mutation.ResetMemory()
+	suo.mutation.SetMemory(i)
+	return suo
+}
+
+// SetNillableMemory sets the "memory" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableMemory(i *int) *SubmissionUpdateOne {
+	if i != nil {
+		suo.SetMemory(*i)
+	}
+	return suo
+}
+
+// AddMemory adds i to the "memory" field.
+func (suo *SubmissionUpdateOne) AddMemory(i int) *SubmissionUpdateOne {
+	suo.mutation.AddMemory(i)
+	return suo
+}
+
+// SetResponse sets the "response" field.
+func (suo *SubmissionUpdateOne) SetResponse(et enum.ResponseType) *SubmissionUpdateOne {
+	suo.mutation.SetResponse(et)
+	return suo
+}
+
+// SetNillableResponse sets the "response" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableResponse(et *enum.ResponseType) *SubmissionUpdateOne {
+	if et != nil {
+		suo.SetResponse(*et)
+	}
+	return suo
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (suo *SubmissionUpdateOne) SetCreatedAt(t time.Time) *SubmissionUpdateOne {
+	suo.mutation.SetCreatedAt(t)
+	return suo
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableCreatedAt(t *time.Time) *SubmissionUpdateOne {
+	if t != nil {
+		suo.SetCreatedAt(*t)
+	}
+	return suo
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (suo *SubmissionUpdateOne) SetUpdatedAt(t time.Time) *SubmissionUpdateOne {
+	suo.mutation.SetUpdatedAt(t)
+	return suo
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (suo *SubmissionUpdateOne) SetNillableUpdatedAt(t *time.Time) *SubmissionUpdateOne {
+	if t != nil {
+		suo.SetUpdatedAt(*t)
+	}
+	return suo
 }
 
 // Mutation returns the SubmissionMutation object of the builder.
@@ -133,8 +378,31 @@ func (suo *SubmissionUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (suo *SubmissionUpdateOne) check() error {
+	if v, ok := suo.mutation.CodeLength(); ok {
+		if err := submission.CodeLengthValidator(v); err != nil {
+			return &ValidationError{Name: "codeLength", err: fmt.Errorf(`ent: validator failed for field "Submission.codeLength": %w`, err)}
+		}
+	}
+	if v, ok := suo.mutation.Memory(); ok {
+		if err := submission.MemoryValidator(v); err != nil {
+			return &ValidationError{Name: "memory", err: fmt.Errorf(`ent: validator failed for field "Submission.memory": %w`, err)}
+		}
+	}
+	if v, ok := suo.mutation.Response(); ok {
+		if err := submission.ResponseValidator(v); err != nil {
+			return &ValidationError{Name: "response", err: fmt.Errorf(`ent: validator failed for field "Submission.response": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (suo *SubmissionUpdateOne) sqlSave(ctx context.Context) (_node *Submission, err error) {
-	_spec := sqlgraph.NewUpdateSpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeInt))
+	if err := suo.check(); err != nil {
+		return _node, err
+	}
+	_spec := sqlgraph.NewUpdateSpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeUUID))
 	id, ok := suo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Submission.id" for update`)}
@@ -158,6 +426,30 @@ func (suo *SubmissionUpdateOne) sqlSave(ctx context.Context) (_node *Submission,
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := suo.mutation.Code(); ok {
+		_spec.SetField(submission.FieldCode, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.CodeLength(); ok {
+		_spec.SetField(submission.FieldCodeLength, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedCodeLength(); ok {
+		_spec.AddField(submission.FieldCodeLength, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.Memory(); ok {
+		_spec.SetField(submission.FieldMemory, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedMemory(); ok {
+		_spec.AddField(submission.FieldMemory, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.Response(); ok {
+		_spec.SetField(submission.FieldResponse, field.TypeEnum, value)
+	}
+	if value, ok := suo.mutation.CreatedAt(); ok {
+		_spec.SetField(submission.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := suo.mutation.UpdatedAt(); ok {
+		_spec.SetField(submission.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Submission{config: suo.config}
 	_spec.Assign = _node.assignValues

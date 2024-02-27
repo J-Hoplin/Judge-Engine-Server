@@ -4,18 +4,33 @@ package ent
 
 import (
 	"fmt"
+	"judge-engine/ent/schema/enum"
 	"judge-engine/ent/submission"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Submission is the model entity for the Submission schema.
 type Submission struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID           int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// Source code of the submission
+	Code string `json:"code,omitempty"`
+	// Lenght of the source code
+	CodeLength int `json:"codeLength,omitempty"`
+	// Memory usage of the process. Unit is 'KB'
+	Memory int `json:"memory,omitempty"`
+	// Response linux signal of process
+	Response enum.ResponseType `json:"response,omitempty"`
+	// Submission created time
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// Submission updated time
+	UpdatedAt    time.Time `json:"updatedAt,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -24,8 +39,14 @@ func (*Submission) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case submission.FieldID:
+		case submission.FieldCodeLength, submission.FieldMemory:
 			values[i] = new(sql.NullInt64)
+		case submission.FieldCode, submission.FieldResponse:
+			values[i] = new(sql.NullString)
+		case submission.FieldCreatedAt, submission.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case submission.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -42,11 +63,47 @@ func (s *Submission) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case submission.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				s.ID = *value
 			}
-			s.ID = int(value.Int64)
+		case submission.FieldCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field code", values[i])
+			} else if value.Valid {
+				s.Code = value.String
+			}
+		case submission.FieldCodeLength:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field codeLength", values[i])
+			} else if value.Valid {
+				s.CodeLength = int(value.Int64)
+			}
+		case submission.FieldMemory:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field memory", values[i])
+			} else if value.Valid {
+				s.Memory = int(value.Int64)
+			}
+		case submission.FieldResponse:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field response", values[i])
+			} else if value.Valid {
+				s.Response = enum.ResponseType(value.String)
+			}
+		case submission.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				s.CreatedAt = value.Time
+			}
+		case submission.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				s.UpdatedAt = value.Time
+			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
 		}
@@ -82,7 +139,24 @@ func (s *Submission) Unwrap() *Submission {
 func (s *Submission) String() string {
 	var builder strings.Builder
 	builder.WriteString("Submission(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("code=")
+	builder.WriteString(s.Code)
+	builder.WriteString(", ")
+	builder.WriteString("codeLength=")
+	builder.WriteString(fmt.Sprintf("%v", s.CodeLength))
+	builder.WriteString(", ")
+	builder.WriteString("memory=")
+	builder.WriteString(fmt.Sprintf("%v", s.Memory))
+	builder.WriteString(", ")
+	builder.WriteString("response=")
+	builder.WriteString(fmt.Sprintf("%v", s.Response))
+	builder.WriteString(", ")
+	builder.WriteString("createdAt=")
+	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

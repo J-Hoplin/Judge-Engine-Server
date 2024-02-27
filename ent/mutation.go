@@ -7,10 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"judge-engine/ent/predicate"
+	"judge-engine/ent/schema/enum"
+	"judge-engine/ent/submission"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 const (
@@ -30,7 +34,15 @@ type SubmissionMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *uuid.UUID
+	code          *string
+	codeLength    *int
+	addcodeLength *int
+	memory        *int
+	addmemory     *int
+	response      *enum.ResponseType
+	createdAt     *time.Time
+	updatedAt     *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Submission, error)
@@ -57,7 +69,7 @@ func newSubmissionMutation(c config, op Op, opts ...submissionOption) *Submissio
 }
 
 // withSubmissionID sets the ID field of the mutation.
-func withSubmissionID(id int) submissionOption {
+func withSubmissionID(id uuid.UUID) submissionOption {
 	return func(m *SubmissionMutation) {
 		var (
 			err   error
@@ -107,9 +119,15 @@ func (m SubmissionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Submission entities.
+func (m *SubmissionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SubmissionMutation) ID() (id int, exists bool) {
+func (m *SubmissionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -120,12 +138,12 @@ func (m *SubmissionMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SubmissionMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SubmissionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -133,6 +151,262 @@ func (m *SubmissionMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetCode sets the "code" field.
+func (m *SubmissionMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *SubmissionMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *SubmissionMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetCodeLength sets the "codeLength" field.
+func (m *SubmissionMutation) SetCodeLength(i int) {
+	m.codeLength = &i
+	m.addcodeLength = nil
+}
+
+// CodeLength returns the value of the "codeLength" field in the mutation.
+func (m *SubmissionMutation) CodeLength() (r int, exists bool) {
+	v := m.codeLength
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeLength returns the old "codeLength" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldCodeLength(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeLength is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeLength requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeLength: %w", err)
+	}
+	return oldValue.CodeLength, nil
+}
+
+// AddCodeLength adds i to the "codeLength" field.
+func (m *SubmissionMutation) AddCodeLength(i int) {
+	if m.addcodeLength != nil {
+		*m.addcodeLength += i
+	} else {
+		m.addcodeLength = &i
+	}
+}
+
+// AddedCodeLength returns the value that was added to the "codeLength" field in this mutation.
+func (m *SubmissionMutation) AddedCodeLength() (r int, exists bool) {
+	v := m.addcodeLength
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCodeLength resets all changes to the "codeLength" field.
+func (m *SubmissionMutation) ResetCodeLength() {
+	m.codeLength = nil
+	m.addcodeLength = nil
+}
+
+// SetMemory sets the "memory" field.
+func (m *SubmissionMutation) SetMemory(i int) {
+	m.memory = &i
+	m.addmemory = nil
+}
+
+// Memory returns the value of the "memory" field in the mutation.
+func (m *SubmissionMutation) Memory() (r int, exists bool) {
+	v := m.memory
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemory returns the old "memory" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldMemory(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemory: %w", err)
+	}
+	return oldValue.Memory, nil
+}
+
+// AddMemory adds i to the "memory" field.
+func (m *SubmissionMutation) AddMemory(i int) {
+	if m.addmemory != nil {
+		*m.addmemory += i
+	} else {
+		m.addmemory = &i
+	}
+}
+
+// AddedMemory returns the value that was added to the "memory" field in this mutation.
+func (m *SubmissionMutation) AddedMemory() (r int, exists bool) {
+	v := m.addmemory
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemory resets all changes to the "memory" field.
+func (m *SubmissionMutation) ResetMemory() {
+	m.memory = nil
+	m.addmemory = nil
+}
+
+// SetResponse sets the "response" field.
+func (m *SubmissionMutation) SetResponse(et enum.ResponseType) {
+	m.response = &et
+}
+
+// Response returns the value of the "response" field in the mutation.
+func (m *SubmissionMutation) Response() (r enum.ResponseType, exists bool) {
+	v := m.response
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResponse returns the old "response" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldResponse(ctx context.Context) (v enum.ResponseType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResponse is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResponse requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResponse: %w", err)
+	}
+	return oldValue.Response, nil
+}
+
+// ResetResponse resets all changes to the "response" field.
+func (m *SubmissionMutation) ResetResponse() {
+	m.response = nil
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (m *SubmissionMutation) SetCreatedAt(t time.Time) {
+	m.createdAt = &t
+}
+
+// CreatedAt returns the value of the "createdAt" field in the mutation.
+func (m *SubmissionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.createdAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "createdAt" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "createdAt" field.
+func (m *SubmissionMutation) ResetCreatedAt() {
+	m.createdAt = nil
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (m *SubmissionMutation) SetUpdatedAt(t time.Time) {
+	m.updatedAt = &t
+}
+
+// UpdatedAt returns the value of the "updatedAt" field in the mutation.
+func (m *SubmissionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updatedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updatedAt" field's value of the Submission entity.
+// If the Submission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubmissionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updatedAt" field.
+func (m *SubmissionMutation) ResetUpdatedAt() {
+	m.updatedAt = nil
 }
 
 // Where appends a list predicates to the SubmissionMutation builder.
@@ -169,7 +443,25 @@ func (m *SubmissionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SubmissionMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 6)
+	if m.code != nil {
+		fields = append(fields, submission.FieldCode)
+	}
+	if m.codeLength != nil {
+		fields = append(fields, submission.FieldCodeLength)
+	}
+	if m.memory != nil {
+		fields = append(fields, submission.FieldMemory)
+	}
+	if m.response != nil {
+		fields = append(fields, submission.FieldResponse)
+	}
+	if m.createdAt != nil {
+		fields = append(fields, submission.FieldCreatedAt)
+	}
+	if m.updatedAt != nil {
+		fields = append(fields, submission.FieldUpdatedAt)
+	}
 	return fields
 }
 
@@ -177,6 +469,20 @@ func (m *SubmissionMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *SubmissionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case submission.FieldCode:
+		return m.Code()
+	case submission.FieldCodeLength:
+		return m.CodeLength()
+	case submission.FieldMemory:
+		return m.Memory()
+	case submission.FieldResponse:
+		return m.Response()
+	case submission.FieldCreatedAt:
+		return m.CreatedAt()
+	case submission.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
 	return nil, false
 }
 
@@ -184,6 +490,20 @@ func (m *SubmissionMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *SubmissionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case submission.FieldCode:
+		return m.OldCode(ctx)
+	case submission.FieldCodeLength:
+		return m.OldCodeLength(ctx)
+	case submission.FieldMemory:
+		return m.OldMemory(ctx)
+	case submission.FieldResponse:
+		return m.OldResponse(ctx)
+	case submission.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case submission.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
 	return nil, fmt.Errorf("unknown Submission field %s", name)
 }
 
@@ -192,6 +512,48 @@ func (m *SubmissionMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *SubmissionMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case submission.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case submission.FieldCodeLength:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeLength(v)
+		return nil
+	case submission.FieldMemory:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemory(v)
+		return nil
+	case submission.FieldResponse:
+		v, ok := value.(enum.ResponseType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResponse(v)
+		return nil
+	case submission.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case submission.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Submission field %s", name)
 }
@@ -199,13 +561,26 @@ func (m *SubmissionMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SubmissionMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcodeLength != nil {
+		fields = append(fields, submission.FieldCodeLength)
+	}
+	if m.addmemory != nil {
+		fields = append(fields, submission.FieldMemory)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SubmissionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case submission.FieldCodeLength:
+		return m.AddedCodeLength()
+	case submission.FieldMemory:
+		return m.AddedMemory()
+	}
 	return nil, false
 }
 
@@ -213,6 +588,22 @@ func (m *SubmissionMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *SubmissionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case submission.FieldCodeLength:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCodeLength(v)
+		return nil
+	case submission.FieldMemory:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemory(v)
+		return nil
+	}
 	return fmt.Errorf("unknown Submission numeric field %s", name)
 }
 
@@ -238,6 +629,26 @@ func (m *SubmissionMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *SubmissionMutation) ResetField(name string) error {
+	switch name {
+	case submission.FieldCode:
+		m.ResetCode()
+		return nil
+	case submission.FieldCodeLength:
+		m.ResetCodeLength()
+		return nil
+	case submission.FieldMemory:
+		m.ResetMemory()
+		return nil
+	case submission.FieldResponse:
+		m.ResetResponse()
+		return nil
+	case submission.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case submission.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Submission field %s", name)
 }
 

@@ -4,11 +4,15 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"judge-engine/ent/schema/enum"
 	"judge-engine/ent/submission"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // SubmissionCreate is the builder for creating a Submission entity.
@@ -18,6 +22,72 @@ type SubmissionCreate struct {
 	hooks    []Hook
 }
 
+// SetCode sets the "code" field.
+func (sc *SubmissionCreate) SetCode(s string) *SubmissionCreate {
+	sc.mutation.SetCode(s)
+	return sc
+}
+
+// SetCodeLength sets the "codeLength" field.
+func (sc *SubmissionCreate) SetCodeLength(i int) *SubmissionCreate {
+	sc.mutation.SetCodeLength(i)
+	return sc
+}
+
+// SetMemory sets the "memory" field.
+func (sc *SubmissionCreate) SetMemory(i int) *SubmissionCreate {
+	sc.mutation.SetMemory(i)
+	return sc
+}
+
+// SetResponse sets the "response" field.
+func (sc *SubmissionCreate) SetResponse(et enum.ResponseType) *SubmissionCreate {
+	sc.mutation.SetResponse(et)
+	return sc
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (sc *SubmissionCreate) SetCreatedAt(t time.Time) *SubmissionCreate {
+	sc.mutation.SetCreatedAt(t)
+	return sc
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (sc *SubmissionCreate) SetNillableCreatedAt(t *time.Time) *SubmissionCreate {
+	if t != nil {
+		sc.SetCreatedAt(*t)
+	}
+	return sc
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (sc *SubmissionCreate) SetUpdatedAt(t time.Time) *SubmissionCreate {
+	sc.mutation.SetUpdatedAt(t)
+	return sc
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (sc *SubmissionCreate) SetNillableUpdatedAt(t *time.Time) *SubmissionCreate {
+	if t != nil {
+		sc.SetUpdatedAt(*t)
+	}
+	return sc
+}
+
+// SetID sets the "id" field.
+func (sc *SubmissionCreate) SetID(u uuid.UUID) *SubmissionCreate {
+	sc.mutation.SetID(u)
+	return sc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sc *SubmissionCreate) SetNillableID(u *uuid.UUID) *SubmissionCreate {
+	if u != nil {
+		sc.SetID(*u)
+	}
+	return sc
+}
+
 // Mutation returns the SubmissionMutation object of the builder.
 func (sc *SubmissionCreate) Mutation() *SubmissionMutation {
 	return sc.mutation
@@ -25,6 +95,7 @@ func (sc *SubmissionCreate) Mutation() *SubmissionMutation {
 
 // Save creates the Submission in the database.
 func (sc *SubmissionCreate) Save(ctx context.Context) (*Submission, error) {
+	sc.defaults()
 	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -50,8 +121,57 @@ func (sc *SubmissionCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (sc *SubmissionCreate) defaults() {
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		v := submission.DefaultCreatedAt()
+		sc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		v := submission.DefaultUpdatedAt()
+		sc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := sc.mutation.ID(); !ok {
+		v := submission.DefaultID()
+		sc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *SubmissionCreate) check() error {
+	if _, ok := sc.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Submission.code"`)}
+	}
+	if _, ok := sc.mutation.CodeLength(); !ok {
+		return &ValidationError{Name: "codeLength", err: errors.New(`ent: missing required field "Submission.codeLength"`)}
+	}
+	if v, ok := sc.mutation.CodeLength(); ok {
+		if err := submission.CodeLengthValidator(v); err != nil {
+			return &ValidationError{Name: "codeLength", err: fmt.Errorf(`ent: validator failed for field "Submission.codeLength": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.Memory(); !ok {
+		return &ValidationError{Name: "memory", err: errors.New(`ent: missing required field "Submission.memory"`)}
+	}
+	if v, ok := sc.mutation.Memory(); ok {
+		if err := submission.MemoryValidator(v); err != nil {
+			return &ValidationError{Name: "memory", err: fmt.Errorf(`ent: validator failed for field "Submission.memory": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.Response(); !ok {
+		return &ValidationError{Name: "response", err: errors.New(`ent: missing required field "Submission.response"`)}
+	}
+	if v, ok := sc.mutation.Response(); ok {
+		if err := submission.ResponseValidator(v); err != nil {
+			return &ValidationError{Name: "response", err: fmt.Errorf(`ent: validator failed for field "Submission.response": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Submission.createdAt"`)}
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Submission.updatedAt"`)}
+	}
 	return nil
 }
 
@@ -66,8 +186,13 @@ func (sc *SubmissionCreate) sqlSave(ctx context.Context) (*Submission, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	sc.mutation.id = &_node.ID
 	sc.mutation.done = true
 	return _node, nil
@@ -76,8 +201,36 @@ func (sc *SubmissionCreate) sqlSave(ctx context.Context) (*Submission, error) {
 func (sc *SubmissionCreate) createSpec() (*Submission, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Submission{config: sc.config}
-		_spec = sqlgraph.NewCreateSpec(submission.Table, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(submission.Table, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeUUID))
 	)
+	if id, ok := sc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := sc.mutation.Code(); ok {
+		_spec.SetField(submission.FieldCode, field.TypeString, value)
+		_node.Code = value
+	}
+	if value, ok := sc.mutation.CodeLength(); ok {
+		_spec.SetField(submission.FieldCodeLength, field.TypeInt, value)
+		_node.CodeLength = value
+	}
+	if value, ok := sc.mutation.Memory(); ok {
+		_spec.SetField(submission.FieldMemory, field.TypeInt, value)
+		_node.Memory = value
+	}
+	if value, ok := sc.mutation.Response(); ok {
+		_spec.SetField(submission.FieldResponse, field.TypeEnum, value)
+		_node.Response = value
+	}
+	if value, ok := sc.mutation.CreatedAt(); ok {
+		_spec.SetField(submission.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := sc.mutation.UpdatedAt(); ok {
+		_spec.SetField(submission.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -99,6 +252,7 @@ func (scb *SubmissionCreateBulk) Save(ctx context.Context) ([]*Submission, error
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SubmissionMutation)
 				if !ok {
@@ -125,10 +279,6 @@ func (scb *SubmissionCreateBulk) Save(ctx context.Context) ([]*Submission, error
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

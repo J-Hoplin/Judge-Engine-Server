@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // SubmissionQuery is the builder for querying Submission entities.
@@ -81,8 +82,8 @@ func (sq *SubmissionQuery) FirstX(ctx context.Context) *Submission {
 
 // FirstID returns the first Submission ID from the query.
 // Returns a *NotFoundError when no Submission ID was found.
-func (sq *SubmissionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SubmissionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -94,7 +95,7 @@ func (sq *SubmissionQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SubmissionQuery) FirstIDX(ctx context.Context) int {
+func (sq *SubmissionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -132,8 +133,8 @@ func (sq *SubmissionQuery) OnlyX(ctx context.Context) *Submission {
 // OnlyID is like Only, but returns the only Submission ID in the query.
 // Returns a *NotSingularError when more than one Submission ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SubmissionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SubmissionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -149,7 +150,7 @@ func (sq *SubmissionQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SubmissionQuery) OnlyIDX(ctx context.Context) int {
+func (sq *SubmissionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -177,7 +178,7 @@ func (sq *SubmissionQuery) AllX(ctx context.Context) []*Submission {
 }
 
 // IDs executes the query and returns a list of Submission IDs.
-func (sq *SubmissionQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (sq *SubmissionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if sq.ctx.Unique == nil && sq.path != nil {
 		sq.Unique(true)
 	}
@@ -189,7 +190,7 @@ func (sq *SubmissionQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SubmissionQuery) IDsX(ctx context.Context) []int {
+func (sq *SubmissionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -257,6 +258,18 @@ func (sq *SubmissionQuery) Clone() *SubmissionQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Code string `json:"code,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Submission.Query().
+//		GroupBy(submission.FieldCode).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (sq *SubmissionQuery) GroupBy(field string, fields ...string) *SubmissionGroupBy {
 	sq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &SubmissionGroupBy{build: sq}
@@ -268,6 +281,16 @@ func (sq *SubmissionQuery) GroupBy(field string, fields ...string) *SubmissionGr
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Code string `json:"code,omitempty"`
+//	}
+//
+//	client.Submission.Query().
+//		Select(submission.FieldCode).
+//		Scan(ctx, &v)
 func (sq *SubmissionQuery) Select(fields ...string) *SubmissionSelect {
 	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
 	sbuild := &SubmissionSelect{SubmissionQuery: sq}
@@ -342,7 +365,7 @@ func (sq *SubmissionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SubmissionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(submission.Table, submission.Columns, sqlgraph.NewFieldSpec(submission.FieldID, field.TypeUUID))
 	_spec.From = sq.sql
 	if unique := sq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -11,7 +11,7 @@ import (
 var client *ent.Client
 
 // Bootstrap Function of ent
-func DatabaseBootstrap() error {
+func MySQLBootstrap() error {
 	var err error
 	client, err = ent.Open("mysql", os.Getenv("ENT_DB_URL"))
 	if err != nil {

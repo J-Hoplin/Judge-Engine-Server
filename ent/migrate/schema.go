@@ -10,7 +10,13 @@ import (
 var (
 	// SubmissionsColumns holds the columns for the "submissions" table.
 	SubmissionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "code", Type: field.TypeString, Size: 2147483647},
+		{Name: "code_length", Type: field.TypeInt},
+		{Name: "memory", Type: field.TypeInt},
+		{Name: "response", Type: field.TypeEnum, Enums: []string{"CORRECT", "WRONG_ANSWER", "TIME_LIMIT_EXCEED", "COMPILE_ERROR", "RUNTIME_ERROR_SIGSEGV", "RUNTIME_ERROR_SIGXFSZ", "RUNTIME_ERROR_SIGFPE", "RUNTIME_ERROR_SIGABRT", "RUNTIME_ERROR_NZEC", "RUNTIME_ERROR", "INTERNAL_ERROR", "EXEC_FORMAT_ERROR", "MEMORY_LIMIT_EXCEED"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// SubmissionsTable holds the schema information for the "submissions" table.
 	SubmissionsTable = &schema.Table{

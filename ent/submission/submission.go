@@ -3,7 +3,12 @@
 package submission
 
 import (
+	"fmt"
+	"judge-engine/ent/schema/enum"
+	"time"
+
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 const (
@@ -11,6 +16,18 @@ const (
 	Label = "submission"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
+	// FieldCodeLength holds the string denoting the codelength field in the database.
+	FieldCodeLength = "code_length"
+	// FieldMemory holds the string denoting the memory field in the database.
+	FieldMemory = "memory"
+	// FieldResponse holds the string denoting the response field in the database.
+	FieldResponse = "response"
+	// FieldCreatedAt holds the string denoting the createdat field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
+	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the submission in the database.
 	Table = "submissions"
 )
@@ -18,6 +35,12 @@ const (
 // Columns holds all SQL columns for submission fields.
 var Columns = []string{
 	FieldID,
+	FieldCode,
+	FieldCodeLength,
+	FieldMemory,
+	FieldResponse,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -30,10 +53,63 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// CodeLengthValidator is a validator for the "codeLength" field. It is called by the builders before save.
+	CodeLengthValidator func(int) error
+	// MemoryValidator is a validator for the "memory" field. It is called by the builders before save.
+	MemoryValidator func(int) error
+	// DefaultCreatedAt holds the default value on creation for the "createdAt" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updatedAt" field.
+	DefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
+
+// ResponseValidator is a validator for the "response" field enum values. It is called by the builders before save.
+func ResponseValidator(r enum.ResponseType) error {
+	switch r {
+	case "CORRECT", "WRONG_ANSWER", "TIME_LIMIT_EXCEED", "COMPILE_ERROR", "RUNTIME_ERROR_SIGSEGV", "RUNTIME_ERROR_SIGXFSZ", "RUNTIME_ERROR_SIGFPE", "RUNTIME_ERROR_SIGABRT", "RUNTIME_ERROR_NZEC", "RUNTIME_ERROR", "INTERNAL_ERROR", "EXEC_FORMAT_ERROR", "MEMORY_LIMIT_EXCEED":
+		return nil
+	default:
+		return fmt.Errorf("submission: invalid enum value for response field: %q", r)
+	}
+}
+
 // OrderOption defines the ordering options for the Submission queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByCodeLength orders the results by the codeLength field.
+func ByCodeLength(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCodeLength, opts...).ToFunc()
+}
+
+// ByMemory orders the results by the memory field.
+func ByMemory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemory, opts...).ToFunc()
+}
+
+// ByResponse orders the results by the response field.
+func ByResponse(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResponse, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the createdAt field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updatedAt field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
