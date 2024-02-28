@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/spf13/cobra"
 	"judge-engine/internal"
+	"judge-engine/internal/config"
 	"judge-engine/tools"
 	"log"
 )
@@ -19,8 +20,12 @@ var ServerRootCmd = &cobra.Command{
 	Short: "Run application bootstrap function",
 	Long:  "Set -w option to execute appplication server with dev mode",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
 
+		var err error
+		err = config.LoadLanguageCommand()
+		if err != nil {
+			return err
+		}
 		// Sync ent orm schema file
 		log.Println("Sync ent ORM schema file...")
 		var syncORMCommandString = []string{"go", "generate", "./ent"}

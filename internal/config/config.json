@@ -1,0 +1,14 @@
+{
+  "python3": {
+    "command": "python3"
+  },
+  "Node.js": {
+    "command": "node"
+  },
+  "TypeScript": {
+    "command": "npx ts-node"
+  },
+  "go": {
+    "command": "go run"
+  }
+}
