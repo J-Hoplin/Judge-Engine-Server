@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"judge-engine/ent/language"
 	"judge-engine/ent/submission"
 	"reflect"
 	"sync"
@@ -73,6 +74,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			language.Table:   language.ValidColumn,
 			submission.Table: submission.ValidColumn,
 		})
 	})

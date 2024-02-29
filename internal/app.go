@@ -3,8 +3,8 @@ package internal
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"judge-engine/internal/controller"
 	"judge-engine/internal/database"
-	"judge-engine/internal/submission"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +31,7 @@ func ApplicationBootstrap(port int) error {
 	r := gin.Default()
 
 	// Enroll Route
-	submission.SubmissionRoute(r)
+	controller.SubmissionRoute(r)
 
 	// Server
 	server = &http.Server{

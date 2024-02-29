@@ -8,6 +8,17 @@ import (
 )
 
 var (
+	// LanguagesColumns holds the columns for the "languages" table.
+	LanguagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// LanguagesTable holds the schema information for the "languages" table.
+	LanguagesTable = &schema.Table{
+		Name:       "languages",
+		Columns:    LanguagesColumns,
+		PrimaryKey: []*schema.Column{LanguagesColumns[0]},
+	}
 	// SubmissionsColumns holds the columns for the "submissions" table.
 	SubmissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -26,6 +37,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		LanguagesTable,
 		SubmissionsTable,
 	}
 )
