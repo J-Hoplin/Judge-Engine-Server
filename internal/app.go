@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"judge-engine/internal/controller"
 	"judge-engine/internal/database"
@@ -38,6 +39,14 @@ func ApplicationBootstrap(port int) error {
 		Addr:    ":" + strconv.Itoa(port),
 		Handler: r,
 	}
+
+	go func() {
+		log.Println("Server start listening on port " + strconv.Itoa(port))
+		if err = server.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
+			log.Fatal("Error while server bootstrap:" + err.Error())
+		}
+	}()
+
 	// Set graceful shutdown of server
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
