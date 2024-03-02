@@ -16,7 +16,7 @@
 2. `Ent` generate
    
     ```shell
-  go generate ./ent
+   go generate ./ent
    ```
 
 3. Compile Application

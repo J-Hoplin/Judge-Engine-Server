@@ -1,0 +1,18 @@
+FROM golang:1.22.0
+
+RUN mkdir app
+
+# Set workdir
+WORKDIR app
+COPY . .
+
+# Application setting
+RUN go mod download\
+    && go generate ./ent\
+    && go build -o app
+
+
+EXPOSE 8080
+
+CMD ["run"]
+ENTRYPOINT ["./app"]

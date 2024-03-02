@@ -1,0 +1,14 @@
+FROM ubuntu:22.04
+
+# Basic apt pakcage manager setting and requirements
+RUN apt-get update\
+    && apt-get upgrade -y\
+    && apt-get install -y wget gcc g++ git build-essential libcap-dev \
+    && mkdir isolate
+
+# Change workdir for isolate installation
+WORKDIR ./isolate
+RUN git clone https://github.com/ioi/isolate.git .\
+    && make isolate
+
+EXPOSE 8080
