@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"judge-engine/tools"
 	"log"
+	"sync"
 )
 
 var buildCommand = &cobra.Command{
@@ -21,28 +22,47 @@ var buildCommand = &cobra.Command{
 
 func buildProjectImage() error {
 	var err error
+	var wg *sync.WaitGroup = new(sync.WaitGroup)
+	var mutex *sync.Mutex = new(sync.Mutex)
 	var apiDockerfileDirectory = deploymentDir + "/ApiDockerfile"
 	var isolateDockerfileDirectory = deploymentDir + "/IsolateDockerfile"
 	var apiDockerImageName = "judge-api"
 	var isolateDockerImageName = "judge-isolate"
-	var command tools.ShellCommand
 
-	log.Println("Build docker image for API server")
-	command = tools.ShellCommand{
-		Command: []string{"docker", "build", "-t", apiDockerImageName, "-f", apiDockerfileDirectory, "."},
-		Visible: true,
-	}
-	if err = command.CommandBuilder().Run(); err != nil {
-		return err
-	}
+	wg.Add(2)
 
-	log.Println("Build docker image for Isolate Environment")
-	command = tools.ShellCommand{
-		Command: []string{"docker", "build", "-t", isolateDockerImageName, "-f", isolateDockerfileDirectory, "."},
-		Visible: true,
-	}
-	if err = command.CommandBuilder().Run(); err != nil {
-		return err
-	}
-	return nil
+	go func() {
+		var innerErr error
+		var command tools.ShellCommand
+		log.Println("Build docker image for API server")
+		command = tools.ShellCommand{
+			Command: []string{"docker", "build", "-t", apiDockerImageName, "-f", apiDockerfileDirectory, "."},
+			Visible: true,
+		}
+		if innerErr = command.CommandBuilder().Run(); innerErr != nil {
+			mutex.Lock()
+			err = innerErr
+			mutex.Unlock()
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		var innerErr error
+		var command tools.ShellCommand
+		log.Println("Build docker image for Isolate Environment")
+		command = tools.ShellCommand{
+			Command: []string{"docker", "build", "-t", isolateDockerImageName, "-f", isolateDockerfileDirectory, "."},
+			Visible: true,
+		}
+		if innerErr = command.CommandBuilder().Run(); innerErr != nil {
+			mutex.Lock()
+			err = innerErr
+			mutex.Unlock()
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return err
 }
