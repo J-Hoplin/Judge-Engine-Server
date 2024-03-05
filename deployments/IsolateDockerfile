@@ -1,15 +1,49 @@
 FROM ubuntu:22.04
 
+LABEL maintainer="J-Hoplin <hoplin.dev@gmail.com>"
+
+USER root
 # Basic apt pakcage manager setting and requirements
+# Includes C/C++ GCC runtime
 RUN apt-get update\
     && apt-get upgrade -y\
-    && apt-get install -y wget gcc g++ git build-essential libcap-dev build-essential libsystemd-dev pkgconf \
-    && mkdir isolate
+    && apt-get install -y wget gcc g++ git curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils \
+    && mkdir isolate\
+    && git config --global advice.detachedHead false
 
-# Install isolate
+# Install linux
+RUN apt-get install -y libffi-dev libncurses5-dev zlib1g zlib1g-dev libssl-dev libreadline-dev libbz2-dev libsqlite3-dev
+
 WORKDIR ./isolate
 RUN git clone https://github.com/ioi/isolate.git .\
     && make isolate\
     && make install
 
-EXPOSE 8080
+RUN adduser --shell /bin/bash --home /asdf --disabled-password asdf
+ENV PATH="${PATH}:/asdf/.asdf/shims:/asdf/.asdf/bin"
+
+USER asdf
+WORKDIR /asdf
+RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git $HOME/.asdf && \
+    echo '. $HOME/.asdf/asdf.sh' >> $HOME/.bashrc && \
+    echo '. $HOME/.asdf/asdf.sh' >> $HOME/.profile
+
+
+# ASDF plugin
+RUN asdf plugin add python \
+    && asdf plugin add golang https://github.com/asdf-community/asdf-golang.git \
+    && asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+# ASDF language runtime install
+# Check supported version with `asdf all list (plugin)
+RUN asdf install python 3.10.0 \
+    && asdf install golang 1.21.0 \
+    && asdf install nodejs 19.9.0
+
+# Set local language runtime version
+# https://asdf-vm.com/guide/getting-started.html#local
+RUN asdf local python 3.10.0\
+    && asdf local golang 1.21.0\
+    && asdf local nodejs 19.9.0
+
+WORKDIR /
