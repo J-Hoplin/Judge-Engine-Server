@@ -7,7 +7,7 @@ USER root
 # Includes C/C++ GCC runtime
 RUN apt-get update\
     && apt-get upgrade -y\
-    && apt-get install -y wget gcc g++ git curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils \
+    && apt-get install -y wget gcc g++ git curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils sudo\
     && mkdir isolate\
     && git config --global advice.detachedHead false
 
@@ -19,11 +19,12 @@ RUN git clone https://github.com/ioi/isolate.git .\
     && make isolate\
     && make install
 
-RUN adduser --shell /bin/bash --home /asdf --disabled-password asdf
-ENV PATH="${PATH}:/asdf/.asdf/shims:/asdf/.asdf/bin"
+RUN adduser --shell /bin/bash --home /hoplin --disabled-password hoplin\
+    && echo "hoplin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
+ENV PATH="${PATH}:/hoplin/.asdf/shims:/hoplin/.asdf/bin"
 
-USER asdf
-WORKDIR /asdf
+USER hoplin
+WORKDIR /hoplin
 RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git $HOME/.asdf && \
     echo '. $HOME/.asdf/asdf.sh' >> $HOME/.bashrc && \
     echo '. $HOME/.asdf/asdf.sh' >> $HOME/.profile
@@ -46,4 +47,4 @@ RUN asdf local python 3.10.0\
     && asdf local golang 1.21.0\
     && asdf local nodejs 19.9.0
 
-WORKDIR /
+WORKDIR /hoplin
