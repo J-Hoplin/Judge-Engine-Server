@@ -13,10 +13,10 @@ RUN apt-get update\
     && git config --global advice.detachedHead false
 
 # Add
-RUN useradd --uid 1000 -m --system hoplin && \
-    adduser hoplin sudo && \
-    echo "hoplin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-USER hoplin
+#RUN useradd --uid 1000 -m --system hoplin && \
+#    adduser hoplin sudo && \
+#    echo "hoplin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+#USER hoplin
 
 # Install linux
 RUN sudo apt-get install -y libffi-dev libncurses5-dev zlib1g zlib1g-dev libssl-dev libreadline-dev libbz2-dev libsqlite3-dev wget gcc g++ curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils
@@ -27,9 +27,9 @@ RUN git clone https://github.com/ioi/isolate.git . \
     && sudo make install
 
 
-ENV PATH="${PATH}:/home/hoplin/.asdf/shims:/home/hoplin/.asdf/bin"
+ENV PATH="${PATH}:/root/.asdf/shims:/root/.asdf/bin"
 
-WORKDIR /home/hoplin
+
 RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git $HOME/.asdf && \
     echo '. $HOME/.asdf/asdf.sh' >> $HOME/.bashrc && \
     echo '. $HOME/.asdf/asdf.sh' >> $HOME/.profile
@@ -47,8 +47,11 @@ RUN asdf install python 3.10.0 \
 
 # Set local language runtime version
 # https://asdf-vm.com/guide/getting-started.html#local
-RUN asdf local python 3.10.0\
-    && asdf local golang 1.21.0\
-    && asdf local nodejs 19.9.0
+RUN asdf local python 3.10.0 \
+    && asdf global python 3.10.0 \
+    && asdf local golang 1.21.0 \
+    && asdf global golang 1.21.0 \
+    && asdf local nodejs 19.9.0 \
+    && asdf global nodejs 19.9.0
 
-WORKDIR /home/hoplin
+WORKDIR /

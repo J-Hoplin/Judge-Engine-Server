@@ -25,7 +25,7 @@ func buildProjectImage() error {
 	var wg *sync.WaitGroup = new(sync.WaitGroup)
 	var mutex *sync.Mutex = new(sync.Mutex)
 	var apiDockerfileDirectory = deploymentDir + "/ApiDockerfile"
-	var isolateDockerfileDirectory = deploymentDir + "/IsolateDockerfile"
+	var isolateDockerfileDirectory = deploymentDir + "/Dockerfile"
 	var apiDockerImageName = "judge-api"
 	var isolateDockerImageName = "judge-isolate"
 
