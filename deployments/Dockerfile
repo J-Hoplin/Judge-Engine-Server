@@ -27,12 +27,12 @@ RUN git clone https://github.com/ioi/isolate.git . \
     && sudo make install
 
 
-ENV PATH="${PATH}:/root/.asdf/shims:/root/.asdf/bin"
+ENV PATH="${PATH}:/opt/asdf/shims:/opt/asdf/bin"
 
 
-RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git $HOME/.asdf && \
-    echo '. $HOME/.asdf/asdf.sh' >> $HOME/.bashrc && \
-    echo '. $HOME/.asdf/asdf.sh' >> $HOME/.profile
+RUN git clone --depth 1 https://github.com/asdf-vm/asdf.git /opt/asdf && \
+    echo '. /opt/asdf/asdf.sh' >> $HOME/.bashrc && \
+    echo '. /opt/asdf/asdf.sh' >> $HOME/.profile
 
 # ASDF plugin
 RUN asdf plugin add python \
