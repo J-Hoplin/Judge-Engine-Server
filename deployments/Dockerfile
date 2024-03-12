@@ -13,10 +13,10 @@ RUN apt-get update\
     && git config --global advice.detachedHead false
 
 # Add
-#RUN useradd --uid 1000 -m --system hoplin && \
-#    adduser hoplin sudo && \
-#    echo "hoplin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-#USER hoplin
+RUN useradd --uid 1000 -m --system hoplin && \
+    adduser hoplin sudo && \
+    echo "hoplin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER hoplin
 
 # Install linux
 RUN sudo apt-get install -y libffi-dev libncurses5-dev zlib1g zlib1g-dev libssl-dev libreadline-dev libbz2-dev libsqlite3-dev wget gcc g++ curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils

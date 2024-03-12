@@ -1,0 +1,27 @@
+FROM ubuntu:22.04
+
+LABEL maintainer="J-Hoplin <hoplin.dev@gmail.com>"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Basic apt pakcage manager setting and requirements
+# Includes C/C++ GCC runtime
+RUN apt-get update\
+    && apt-get upgrade -y\
+    && apt-get install -y sudo git curl libffi-dev libncurses5-dev zlib1g zlib1g-dev libssl-dev libreadline-dev libbz2-dev libsqlite3-dev wget gcc g++ curl build-essential libcap-dev build-essential libsystemd-dev pkgconf gnupg ca-certificates coreutils\
+    && mkdir isolate\
+    && git config --global advice.detachedHead false
+
+# Isolate install
+WORKDIR /root/isolate
+RUN git clone https://github.com/ioi/isolate.git . \
+    && sudo make isolate \
+    && sudo make install
+
+# Add node.js repository and install Node.js, Python, Golang
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash \
+    && apt-get install -y nodejs python3.10 golang
+
+WORKDIR /root
+
+
