@@ -20,7 +20,7 @@ RUN git clone https://github.com/ioi/isolate.git . \
 
 # Add node.js repository and install Node.js, Python, Golang
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash \
-    && apt-get install -y nodejs python3.10 golang
+    && apt-get install -y nodejs python3.10 golang gccgo
 
 WORKDIR /root
 
